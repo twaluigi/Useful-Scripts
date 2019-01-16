@@ -1,0 +1,7 @@
+#!/bin/bash
+# syncs my Google Drive with an S3 bucket
+SNS_TOPIC=arn:aws:sns:topic-arn
+FAIL_MESSAGE="Rclone Google Drive sync failed!"
+REGION="us-east-1"
+RCLONE_CONF="/home/ec2-user/.config/rclone/rclone.conf"
+(nohup rclone sync --config $RCLONE_CONF --log-file /var/log/rclone.log --exclude "/excluded-dir/**" --delete-excluded --tpslimit 10 googledrive-source: s3-destionation:bucket-name > /var/log/rclone.log 2>&1 && echo "`date` Rclone Google Drive sync completed" || aws sns publish --topic-arn $SNS_TOPIC --message "$FAIL_MESSAGE" --region $REGION) &

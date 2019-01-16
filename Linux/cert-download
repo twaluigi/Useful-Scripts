@@ -1,0 +1,12 @@
+#!/bin/bash
+# syncs home.tomwy.com certificate to the server
+S3_BUCKET="s3://BUCKET_NAME"
+CERT_DOMAIN="FQDN"
+CERT_DOWNLOAD_DIR="/PATH/TO/CERT/DIR"
+SNS_TOPIC=arn:aws:TOPIC_ARN
+FAIL_MESSAGE="$CERT_DOMAIN certificate download failed!"
+REGION="us-east-2"
+export AWS_SHARED_CREDENTIALS_FILE=/PATH/TO/AWS/CREDS
+export AWS_CONFIG_FILE=/PATH/TO/AWS/CONFIG
+aws s3 cp $S3_BUCKET/live/$CERT_DOMAIN/cert.pem $CERT_DOWNLOAD_DIR/$CERT_DOMAIN.crt || aws sns publish --topic-arn $SNS_TOPIC --message "$FAIL_MESSAGE" --region $REGION
+aws s3 cp $S3_BUCKET/live/$CERT_DOMAIN/privkey.pem $CERT_DOWNLOAD_DIR/$CERT_DOMAIN.key || aws sns publish --topic-arn $SNS_TOPIC --message "$FAIL_MESSAGE" --region $REGION

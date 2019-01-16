@@ -1,0 +1,11 @@
+#!/bin/bash
+# letsencrypt certbot must be installed prior to using script
+S3_BUCKET="s3://bucket-name"
+SNS_TOPIC=arn:aws:sns:topic-arn
+FAIL_MESSAGE_CERTBOT="Certbot failed to renew domains!"
+FAIL_MESSAGE_SYNC="Failed to sync certs to S3!"
+REGION="us-east-1"
+PATH=$PATH:/home/ubuntu/.local/bin/
+certbot renew --dns-route53 --logs-dir /home/ubuntu/letsencrypt/log/ --config-dir /home/ubuntu/letsencrypt/config/ --work-dir /home/ubuntu/letsencrypt/work/ --non-interactive --server https://acme-v02.api.letsencrypt.org/directory >> /var/log/certbot.log 2>&1 || aws sns publish --topic-arn $SNS_TOPIC --message "$FAIL_MESSAGE_CERTBOT" --region $REGION
+aws s3 sync /home/ubuntu/letsencrypt/config/live $S3_BUCKET/live || aws sns publish --topic-arn $SNS_TOPIC --message "$FAIL_MESSAGE_SYNC" --region $REGION
+aws s3 sync /home/ubuntu/letsencrypt/config/archive $S3_BUCKET/archive || aws sns publish --topic-arn $SNS_TOPIC --message "$FAIL_MESSAGE_SYNC" --region $REGION
