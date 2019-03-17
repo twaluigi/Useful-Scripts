@@ -1,0 +1,10 @@
+#!/bin/bash
+# syncs home.tomwy.com certificate to the server
+S3_BUCKET="s3://tomwygonik-backups"
+SNS_TOPIC=arn:aws:sns:us-east-2:044157396581:sns_to_ifttt
+FAIL_MESSAGE="Armstrong Backup failed!"
+REGION="us-east-2"
+BACKUP_DIR="/mnt/tank/backups"
+export AWS_SHARED_CREDENTIALS_FILE=/home/thomas/.aws/credentials
+export AWS_CONFIG_FILE=/home/thomas/.aws/config
+aws s3 sync $BACKUP_DIR $S3_BUCKET || aws sns publish --topic-arn $SNS_TOPIC --message "$FAIL_MESSAGE" --region $REGION 
